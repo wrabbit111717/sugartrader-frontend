@@ -603,7 +603,7 @@ const Negociation = () => {
                                             <Avatar src={msg.avatar} />
                                             <span>{msg.sender?.name}</span>
                                         </Box>                                        
-                                        <Anchor href={'http://sugartrader.com.br/message/' + msg.file_name} target="_blank" underline={true} download={msg.file_name}>
+                                        <Anchor href={'http://sugartrade.com.br/message/' + msg.file_name} target="_blank" underline={true} download={msg.file_name}>
                                             {msg.file_name}
                                         </Anchor>
                                     </Box>

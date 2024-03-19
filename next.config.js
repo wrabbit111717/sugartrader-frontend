@@ -8,8 +8,8 @@ module.exports = {
   reactStrictMode: true,
   env: {
     appName: 'MVP',
-    webUrl: 'http://sugartrader.com.br',
-    baseUrl: 'http://sugartrader.com.br',
+    webUrl: 'http://sugartrade.com.br',
+    baseUrl: 'http://sugartrade.com.br',
     cluster: 'ap3',
   },
   images: {

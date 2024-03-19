@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const axiosConfig = axios.create({
   // baseURL: process.env.baseUrl,
-  baseURL: 'http://sugartrader.com.br/'
+  baseURL: 'http://sugartrade.com.br/'
 });
 
 axiosConfig.defaults.headers.common['Access-Control-Allow-Origin'] = '*';

@@ -1,4 +1,4 @@
-const BASE_URL = 'http://sugartrader.com.br'; // Replace with your API base URL
+const BASE_URL = 'http://sugartrade.com.br'; // Replace with your API base URL
 
 async function fetchJson<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${BASE_URL}${url}`, options);

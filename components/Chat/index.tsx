@@ -101,7 +101,7 @@ const ChatComponent: React.FC = () => {
             {msg.text && <div>{msg.text}</div>}
             {msg.fileName && msg.downloadLink && ( // Check if the message has a fileName and downloadLink
               <div>
-                <a href={'http://sugartrader.com.br'+msg.downloadLink} download={msg.fileName}>
+                <a href={'http://sugartrade.com.br'+msg.downloadLink} download={msg.fileName}>
                   {msg.fileName}
                 </a>
               </div>
