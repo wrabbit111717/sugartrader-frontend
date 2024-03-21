@@ -12,9 +12,10 @@ const Offers = () => {
     const [user, setUser] = useState<string>('');
     const [type, setType] = useState(0);
     const [offers, setOffer] = useState<Offer[]>([]);
+    const [owneroffers, setOwnerOffer] = useState<Offer[]>([]);
     const [filtered, setFiltered] = useState<Offer[]>([]);
     const [amount, setAmount] = useState('');
-    const [email, setEmail] = useState('');
+    const [product, setProduct] = useState('');
     const [offertype, setOfferType] = useState<string>('');
     const [destinationPort, setDestinationPort] = useState('');
     const isMobile = useMediaQuery(`(max-width: ${SCREEN_WIDTH}px)`);
@@ -40,7 +41,8 @@ const Offers = () => {
         title : String,
         category : String,
         email : String,
-        content : String
+        content : String,
+        user_id: String
     }
     interface DecodedToken {
         email: string;
@@ -77,11 +79,18 @@ const Offers = () => {
             }
             if(loggedUser)
                 setUser(loggedUser?.userId);
+            console.log(loggedUser, 'user')
 
             try {
                 const response = await apiService.post<any>(URL_OFFER_GET_ALL, { type: type, user_id: loggedUser?.userId });
-                setOffer(response.offers);
-                console.log(response, 'response');
+
+                // Filter out offers based on the user ID condition
+                const filteredOffers = response.offers.filter((offer: Offer) => offer.user_id !== loggedUser?.userId);
+                const filteredOwnerOffers = response.offers.filter((offer: Offer) => offer.user_id === loggedUser?.userId);
+                
+                // Set the filtered offers to the offer state
+                setOffer(filteredOffers);                console.log(response, user, 'response');
+                setOwnerOffer(filteredOwnerOffers);                console.log(response, user, 'response');
             } catch (error) {
                 console.error('Error fetching offers:', error);
                 // Handle error
@@ -209,9 +218,10 @@ const Offers = () => {
         let filtered = offers;
         filtered = offers.filter((offer) => {
           // Replace the conditions with your actual filtering logic based on user input values
+          console.log(offer, 'each')
           return (
             (offer.amount === parseInt(amount) || !amount) &&
-            (offer.email === email || !email) &&
+            (offer.product === product || !product) &&
             (offer.offertype === offertype || !offertype) &&
             (offer.dest_port === destinationPort || !destinationPort)
           );
@@ -227,6 +237,10 @@ const Offers = () => {
         }
         console.log(filtered, offers, 'filtered');
       };
+
+    const editOffer = (id: string) => {
+        console.log(id, 'id')
+    }
     return (
         <Flex
         direction={'column'}
@@ -347,11 +361,11 @@ const Offers = () => {
                     />
                     <TextInput
                     mt="md"
-                    label="Email Address*"
-                    placeholder="Email"
+                    label="Product*"
+                    placeholder="product"
                     size="md"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    value={product}
+                    onChange={(event) => setProduct(event.target.value)}
                     />
                     <Select
                     data={OFFER_TYPE_OPTIONS}
@@ -379,6 +393,75 @@ const Offers = () => {
                 </Box>
             </Grid.Col>
             <Grid.Col md={9} sm={12}>
+            <Text mb={10}>My Offers</Text>
+            <Grid mb={10}>
+                {
+                    owneroffers.map((offer, index) => (
+                    <Grid.Col key={index} lg={4} md={6} sm={12}>
+                        <Card shadow="sm" padding="lg" radius="md" withBorder>
+                            <Card.Section bg={'#2DC071'}>
+                                <Flex p={20} gap={20} align={'center'} justify={'center'}>
+                                    <Flex
+                                        sx={(theme) => ({
+                                            width: 50,
+                                            height: 50,
+                                            borderRadius: '100%',
+                                            background: 'white'
+                                        })}
+                                        align={'center'}
+                                        justify={'center'}
+                                    >
+                                        <FaUsers size={20} color="#8EC2F2" />
+                                    </Flex>
+                                    <Text color="white" size={16} weight={'bold'}>
+                                        {offer.offertype}
+                                    </Text>
+                                </Flex>
+                            </Card.Section>
+                            <Group position="apart" mt="md" mb="xs">
+                                <Text weight={500}>{offer.product}</Text> {/* Adjust this to match your offer object structure */}
+                            </Group>
+                            <Text size="sm" color="dimmed">
+                                {offer.content} {/* Adjust this to match your offer object structure */}
+                            </Text>
+                            <Button
+                                color="green"
+                                mt={30}
+                                fullWidth
+                                onClick={() => editOffer(offer._id)}
+                            >
+                                Offer Id {offer._id}
+                            </Button>
+
+                            <Modal
+                                title="Confirm Action"
+                                opened={confirmationOpen}
+                                onClose={() => setConfirmationOpen(false)}
+                                size="sm"
+                                padding="lg"
+                            >
+                                <p>Are you sure you want to request more information?</p>
+                                <Button
+                                variant="outline"
+                                color="gray"
+                                onClick={() => setConfirmationOpen(false)}
+                                >
+                                Cancel
+                                </Button>
+                                <Button
+                                color="green"
+                                onClick={() => handleRequestInfoClick(offer._id)} // Pass offer ID to the click handler
+                                >
+                                Confirm
+                                </Button>
+                            </Modal>
+
+                        </Card>
+                    </Grid.Col>
+                ))
+                }
+            </Grid>
+            <Text mt={10} mb={10}>Availalbe Offers</Text>
             <Grid>
                 {filtered.length > 0 ? (
                     filtered.map((offer, index) => (

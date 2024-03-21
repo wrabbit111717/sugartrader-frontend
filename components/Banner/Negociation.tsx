@@ -1,4 +1,4 @@
-import { Box, Flex, Button, Text, Modal, Grid, Card, Group, TextInput, Checkbox, Paper, Avatar, Anchor } from "@mantine/core";
+import { Box, Flex, Button, Text, Modal, Grid, Card, Group, TextInput, Checkbox, Paper, Avatar, Anchor, FileInput } from "@mantine/core";
 import { MOBILE_WIDTH, SCREEN_WIDTH } from "@util/consts";
 import { useState, useEffect, useRef } from 'react';
 import Chat from '@component/Chat'
@@ -26,6 +26,7 @@ const Negociation = () => {
     const inputFile = useRef<HTMLInputElement>(null);
     const [message, setMessage] = useState<string>('');
     const [file, setFile] = useState<File | null>(null);
+    const [fileStatus, setFileStatus] = useState<Boolean>(true);
 
     const [negotiationId, setNegotiationId] = useState('');
     const [stage, setStage] = useState(0);
@@ -86,6 +87,7 @@ const Negociation = () => {
         file?: File | null;
         file_name?: string;
         downloadLink?: string;
+        status: boolean;
     }
 
     const openModal = () => {
@@ -135,7 +137,8 @@ const Negociation = () => {
         let newMessage: Message = {
             avatar: '',
             sender: [],
-            type: 0
+            type: 0,
+            status: true
         };
     
         const userString = localStorage.getItem('user');
@@ -162,6 +165,9 @@ const Negociation = () => {
             reader.readAsArrayBuffer(file);
             setFile(null);
             setFileUploadStatus('');
+            newMessage.file_name = file?.name;
+            newMessage.sender.name = loggedUser?.name;
+
         } else {
             // If no file, emit the message without fileData
             socket.emit('chat message', { room: negotiationId, message: message, senderId: user });
@@ -186,6 +192,7 @@ const Negociation = () => {
             const response = await apiService.post<any>(URL_OFFER_UPDATE_NEGOTIATION, { stage: stage, negotiationId: negotiationId, status: true });
             setNegotiation(response.negotiation);
             setStage(response.negotiation.stage);
+            setFileStatus(true);
             socket.emit('chat message', { room: negotiationId, message: 'Your request accepted', senderId: user });
         } catch (error) {
             console.error('Error fetching offers:', error);
@@ -197,6 +204,7 @@ const Negociation = () => {
         try {
             const response = await apiService.post<any>(URL_OFFER_UPDATE_NEGOTIATION, { stage: stage, negotiationId: negotiationId, status: false });
             setNegotiation(response.negotiation);
+            setFileStatus(true);
             socket.emit('chat message', { room: negotiationId, message: 'Your request declined', senderId: user });
         } catch (error) {
             console.error('Error fetching offers:', error);
@@ -244,9 +252,7 @@ const Negociation = () => {
     }, []);
 
     useEffect(() => {
-        if (messageContainerRef.current) {
-            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
-        }
+        scrollToBottom();
     }, [messages]);
   
     useEffect(() => {
@@ -275,10 +281,13 @@ const Negociation = () => {
             //     }
             //     return updatedMessages;
             // });
+            console.log('receivedddd')
             setMessages((prevMessages) => {
                 const updatedMessages = [...prevMessages, newMessage];
                 if(newMessage.file_name) {
+                    console.log(newMessage, 'receivedddd_______')
                     let lastFileIndex = 0;
+                    setFileStatus(newMessage.status)
             
                     for (let i = updatedMessages.length - 1; i >= 0; i--) {
                         const msg = updatedMessages[i];
@@ -317,6 +326,7 @@ const Negociation = () => {
                         stage: prevState.stage + 1
                     };
                 });
+                setFileStatus(true);
             }
         
             console.log(negotiation, messages, lastFile,  'lastFilechat')
@@ -327,6 +337,13 @@ const Negociation = () => {
             socket.off('chat message');
         };
     }, []);
+
+    const scrollToBottom = () => {
+        if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+    }
+
     return (
         <Flex
             direction={'column'}
@@ -571,7 +588,7 @@ const Negociation = () => {
                                         {msg.text}
                                         </Box>}
                                     {/* Check if the message has a file and render the accept and decline buttons for the receiver */}
-                                    {msg.type === 1 && msg.sender?._id && user && user !== msg.sender?._id && msg.file_name && lastFile === index && !negotiation?.status && (
+                                    {msg.type === 1 && msg.sender?._id && user && user !== msg.sender?._id && msg.file_name && lastFile === index && !fileStatus && (
                                     <Box>
                                         <Button onClick={() => handleAcceptStage(stage, negotiationId)}>Accept</Button>
                                         <Button color="orange" onClick={() => handleDeclineStage(stage, negotiationId)}>Decline</Button>

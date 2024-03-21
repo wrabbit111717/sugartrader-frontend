@@ -126,23 +126,10 @@ const Signin = () => {
                 confirmPassword: signupForm.values.confirmPassword
             });
 
-            // Assuming the API returns a token upon successful registration
-            const token = response.token;
-
-            // Store the token in your application state or wherever you manage authentication
-            if(token) {
-                homeDispatch({
-                    field: 'user_data',
-                    value: { token },
-                });
-                localStorage.setItem('user', JSON.stringify(token));
-                router.push("/offers", undefined, { shallow: true });
-            } else {
-                notifications.show({
-                    title: 'Register',
-                    message: 'Please insert correct credentials',
-                })                
-            }
+            notifications.show({
+                title: 'Register',
+                message: 'Please check your Email Address',
+            }) 
         } catch (error) {
             console.error('Signup error:', error);
         } finally {
@@ -266,15 +253,61 @@ const Signin = () => {
                         >
                             <TextInput label="Name" placeholder="Name" withAsterisk {...signupForm.getInputProps('name')} mt={30} w={350} />
                             <TextInput label="Email" placeholder="Email" withAsterisk {...signupForm.getInputProps('email')} w={350} />
-                            <TextInput
-                                label="Password"
-                                type="password"
-                                placeholder="Password"
-                                withAsterisk
-                                {...signupForm.getInputProps('password')}
-                                w={350}
-                            />
-                            <TextInput label="Confirm Password" type="password" placeholder="Confirm Password" withAsterisk {...signupForm.getInputProps('confirmPassword')} w={350} />
+                            <Flex align="center" justify={"center"}>
+                                <TextInput
+                                    label="Password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Password"
+                                    withAsterisk
+                                    {...signupForm.getInputProps('password')}
+                                    w={305} // Adjust width to accommodate the eye icon
+                                    h={85}
+                                />
+                                <Button
+                                    onClick={togglePasswordVisibility}
+                                    type="button"
+                                    style={{
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {
+                                        showPassword ? 
+                                        <FaEye size={20} color="#8EC2F2"/>    
+                                        :
+                                        <FaEyeSlash size={20} color="#8EC2F2"/>    
+                                    }
+
+                                </Button>
+                            </Flex>
+                            <Flex align="center" justify={"center"}>
+                                <TextInput
+                                    label="Confirm Password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Confirm Password"
+                                    withAsterisk
+                                    {...signupForm.getInputProps('confirmPassword')}
+                                    w={305} // Adjust width to accommodate the eye icon
+                                    h={85}
+                                />
+                                <Button
+                                    onClick={togglePasswordVisibility}
+                                    type="button"
+                                    style={{
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {
+                                        showPassword ? 
+                                        <FaEye size={20} color="#8EC2F2"/>    
+                                        :
+                                        <FaEyeSlash size={20} color="#8EC2F2"/>    
+                                    }
+
+                                </Button>
+                            </Flex>
+
                             <Button type="submit">
                                 Sign Up
                             </Button>
