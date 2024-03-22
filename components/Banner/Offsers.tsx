@@ -82,15 +82,7 @@ const Offers = () => {
             console.log(loggedUser, 'user')
 
             try {
-                const response = await apiService.post<any>(URL_OFFER_GET_ALL, { type: type, user_id: loggedUser?.userId });
-
-                // Filter out offers based on the user ID condition
-                const filteredOffers = response.offers.filter((offer: Offer) => offer.user_id !== loggedUser?.userId);
-                const filteredOwnerOffers = response.offers.filter((offer: Offer) => offer.user_id === loggedUser?.userId);
-                
-                // Set the filtered offers to the offer state
-                setOffer(filteredOffers);                console.log(response, user, 'response');
-                setOwnerOffer(filteredOwnerOffers);                console.log(response, user, 'response');
+                getOffers(type);
             } catch (error) {
                 console.error('Error fetching offers:', error);
                 // Handle error
@@ -128,14 +120,16 @@ const Offers = () => {
                 notifications.show({
                     title: 'Offer Submitted',
                     message: 'Your offer has been submitted successfully.',
-                })                
+                })            
+                getOffers(type);
                 offerForm.setValues({
                     type: type,
                     amount: '',
                     offer_type: '',
                     contract_date: '',
                     spot: '',
-                    dest_port: ''
+                    dest_port: '',
+                    product: ''
                 });
             } else {
                 notifications.show({
@@ -163,7 +157,12 @@ const Offers = () => {
         setType(type);
         try{
             const response = await apiService.post<any>(URL_OFFER_GET_ALL, {type: type, user_id: user});
-            setOffer(response.offers);
+            const filteredOffers = response.offers.filter((offer: Offer) => offer.user_id !== user);
+            const filteredOwnerOffers = response.offers.filter((offer: Offer) => offer.user_id === user);
+            
+            // Set the filtered offers to the offer state
+            setOffer(filteredOffers);
+            setOwnerOffer(filteredOwnerOffers);                
             console.log(response, 'response')
         } catch (error) {
             console.error('Signin error:', error);
@@ -192,6 +191,7 @@ const Offers = () => {
 
             if(response.status === 200)
             {
+                getOffers(type);
                 notifications.show({
                     title: 'Offer Request Submitted',
                     message: 'Your offer Request has been submitted successfully.',
@@ -498,7 +498,7 @@ const Offers = () => {
                                     fullWidth
                                     onClick={() => setConfirmationOpen(true)}
                                 >
-                                    Request more information
+                                    Request Negotiation
                                 </Button>
 
                                 <Modal

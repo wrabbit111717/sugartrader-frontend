@@ -216,40 +216,49 @@ const Negociation = () => {
         const fetchData = async () => {
             const userString = localStorage.getItem('user');
             let loggedUser: DecodedToken | null = null;
-        
+    
             if (userString) {
                 loggedUser = JSON.parse(userString);
             }
-            if(loggedUser) {
-                setUser(loggedUser?.userId);
-                setName(loggedUser?.name);
+            if (loggedUser) {
+                setUser(loggedUser.userId);
+                setName(loggedUser.name);
             }
-
+    
             try {
                 const response = await apiService.post<any>(URL_OFFER_GET_NEGOTIATIONS, { user_id: loggedUser?.userId });
-                
+    
+                const pending: any[] = [];
+                const progress: any[] = [];
+                const complete: any[] = [];
+    
                 response.negotiations?.forEach((negotiation: Negotiation) => {
                     if (negotiation.stage === 0) {
-                        setPendingNegotiations((prevNegotiations) => [...prevNegotiations, negotiation]);
+                        pending.push(negotiation);
                     } else if (negotiation.stage > 0 && negotiation.stage < 5) {
-                        setProgressNegotiations((prevNegotiations) => [...prevNegotiations, negotiation]);
+                        progress.push(negotiation);
                     } else if (negotiation.stage === 5) {
-                        setCompleteNegotiations((prevNegotiations) => [...prevNegotiations, negotiation]);
+                        complete.push(negotiation);
                     }
                 });
-                console.log(pendingNegotiations, progressNegotiations, completeNegotiations, 'responses');
+    
+                setPendingNegotiations(pending);
+                setProgressNegotiations(progress);
+                setCompleteNegotiations(complete);
+    
+                console.log(pending, progress, complete, 'responses');
                 setNegotiations(response.negotiations);
             } catch (error) {
                 console.error('Error fetching offers:', error);
                 // Handle error
             }
         };
-
-        // Call the fetchData function when the component mounts
-        fetchData();
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    
+        // Call the fetchData function only once when the component mounts
+        if (!negotiations.length) {
+            fetchData();
+        }
+    }, [negotiations]);
 
     useEffect(() => {
         scrollToBottom();

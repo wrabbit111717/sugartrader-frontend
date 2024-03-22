@@ -126,10 +126,22 @@ const Signin = () => {
                 confirmPassword: signupForm.values.confirmPassword
             });
 
-            notifications.show({
-                title: 'Register',
-                message: 'Please check your Email Address',
-            }) 
+            const token = response.token;
+            const decodedToken = jwt.decode(token);
+
+            if(token) {
+                homeDispatch({
+                    field: 'user_data',
+                    value: { token },
+                });
+                localStorage.setItem('user', JSON.stringify(decodedToken));
+                router.push("/offers", undefined, { shallow: true });
+            } else {
+                notifications.show({
+                    title: 'Sign in',
+                    message: 'Please insert correct credential',
+                })                
+            }
         } catch (error) {
             console.error('Signup error:', error);
         } finally {
